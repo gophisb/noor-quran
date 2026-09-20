@@ -21,3 +21,5 @@ test("Noor Quran boots without runtime errors", async ({ page }) => {
   expect(rootText).not.toMatch(/تعذر تشغيل واجهة التطبيق|تعذّر تشغيل واجهة التطبيق/);
   expect(errors, errors.join("\n")).toEqual([]);
 });
+
+// Runtime smoke test: CommonJS runner for CI.
