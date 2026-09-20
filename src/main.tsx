@@ -1,5 +1,6 @@
 import { Component, StrictMode, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import App from "./App";
 import "./index.css";
 
 class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -48,21 +49,4 @@ const mount = (App: React.ComponentType) => {
   );
 };
 
-// Load the application entry lazily so a broken secondary module cannot leave
-// GitHub Pages on an unexplained blank screen. Vite rewrites this import using
-// the configured /noor-quran/ base path.
-import("./App")
-  .then(({ default: App }) => mount(App))
-  .catch((error) => {
-    console.error("Noor Quran boot failure:", error);
-    root.innerHTML =
-      '<div dir="rtl" style="min-height:100vh;display:grid;place-items:center;background:#050b14;color:#fff;font-family:Tajawal,Arial,sans-serif;padding:24px;text-align:center">' +
-      '<div style="max-width:760px">' +
-      '<div style="font-size:32px;font-weight:800;color:#e9c767">نور</div>' +
-      '<div style="margin-top:14px;font-size:20px">تعذّر تشغيل التطبيق</div>' +
-      '<div style="margin-top:12px;color:#b9c1cc;white-space:pre-wrap;word-break:break-word;font-size:14px">' +
-      String(error?.message || error || "خطأ غير معروف أثناء تحميل التطبيق") +
-      "</div>" +
-      '<button onclick="location.reload()" style="margin-top:20px;border:1px solid rgba(94,234,212,.4);border-radius:999px;background:rgba(94,234,212,.12);color:#d8fffa;padding:10px 18px">إعادة المحاولة</button>' +
-      "</div></div>";
-  });
+mount(App);
