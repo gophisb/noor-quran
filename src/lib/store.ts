@@ -41,10 +41,10 @@ const isLastRead = (value: unknown): value is LastRead =>
 
 const isBookmark = (value: unknown): value is Bookmark =>
   isRecord(value) &&
-  Number.isInteger(value.surah) &&
+  typeof value.surah === "number" && Number.isInteger(value.surah) &&
   value.surah >= 1 &&
   value.surah <= 114 &&
-  Number.isInteger(value.ayah) &&
+  typeof value.ayah === "number" && Number.isInteger(value.ayah) &&
   value.ayah >= 1 &&
   value.ayah <= 300 &&
   typeof value.addedAt === "number" && Number.isFinite(value.addedAt);
