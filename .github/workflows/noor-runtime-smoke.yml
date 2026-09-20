@@ -43,49 +43,7 @@ jobs:
         run: npx --yes playwright@1.55.0 install --with-deps chromium
 
       - name: Browser runtime test
-        run: |
-          npx --yes --package playwright@1.55.0 -- node <<'NODE'
-          const { chromium } = require("playwright");
-
-          (async () => {
-            const browser = await chromium.launch({ headless: true });
-            const page = await browser.newPage();
-            const errors = [];
-            page.on("pageerror", (error) => errors.push(`PAGEERROR: ${error.stack || error.message}`));
-            page.on("console", (message) => {
-              if (message.type() === "error") errors.push(`CONSOLE: ${message.text()}`);
-            });
-
-            await page.goto("http://127.0.0.1:4173/noor-quran/", { waitUntil: "networkidle", timeout: 30000 });
-            await page.waitForTimeout(2500);
-
-            const rootText = await page.locator("#root").innerText();
-            const title = await page.title();
-            console.log("TITLE:", title);
-            console.log("ROOT:", rootText.slice(0, 1200));
-
-            if (errors.length) {
-              console.error(errors.join("\n"));
-              await browser.close();
-              process.exit(1);
-            }
-            if (!rootText.includes("نور")) {
-              console.error("Noor boot marker is missing from #root.");
-              await browser.close();
-              process.exit(1);
-            }
-            if (rootText.includes("تعذر تشغيل واجهة التطبيق") || rootText.includes("تعذّر تشغيل واجهة التطبيق")) {
-              console.error("Application rendered its boot-error screen.");
-              await browser.close();
-              process.exit(1);
-            }
-
-            await browser.close();
-          })().catch((error) => {
-            console.error(error.stack || error.message);
-            process.exit(1);
-          });
-          NODE
+        run: npx --yes playwright@1.55.0 test tests/noor-runtime.spec.js --workers=1
 
       - name: Show preview log on failure
         if: failure()
