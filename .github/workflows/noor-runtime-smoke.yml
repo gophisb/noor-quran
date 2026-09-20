@@ -1,0 +1,92 @@
+name: Noor Quran Runtime Smoke Test
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start preview server
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 > /tmp/noor-preview.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/noor-quran/ > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/noor-quran/ > /dev/null
+
+      - name: Install Chromium
+        run: npx --yes playwright@1.55.0 install --with-deps chromium
+
+      - name: Browser runtime test
+        run: |
+          npx --yes -p playwright@1.55.0 node <<'NODE'
+          const { chromium } = require("playwright");
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage();
+            const errors = [];
+            page.on("pageerror", (error) => errors.push(`PAGEERROR: ${error.stack || error.message}`));
+            page.on("console", (message) => {
+              if (message.type() === "error") errors.push(`CONSOLE: ${message.text()}`);
+            });
+
+            await page.goto("http://127.0.0.1:4173/noor-quran/", { waitUntil: "networkidle", timeout: 30000 });
+            await page.waitForTimeout(2500);
+
+            const rootText = await page.locator("#root").innerText();
+            const title = await page.title();
+            console.log("TITLE:", title);
+            console.log("ROOT:", rootText.slice(0, 1200));
+
+            if (errors.length) {
+              console.error(errors.join("\n"));
+              await browser.close();
+              process.exit(1);
+            }
+            if (!rootText.includes("نور")) {
+              console.error("Noor boot marker is missing from #root.");
+              await browser.close();
+              process.exit(1);
+            }
+            if (rootText.includes("تعذر تشغيل واجهة التطبيق") || rootText.includes("تعذّر تشغيل واجهة التطبيق")) {
+              console.error("Application rendered its boot-error screen.");
+              await browser.close();
+              process.exit(1);
+            }
+
+            await browser.close();
+          })().catch((error) => {
+            console.error(error.stack || error.message);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Show preview log on failure
+        if: failure()
+        run: cat /tmp/noor-preview.log || true
