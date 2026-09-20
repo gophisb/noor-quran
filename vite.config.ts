@@ -7,9 +7,11 @@ import { defineConfig } from "vite";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// GitHub Pages needs the repository prefix; Capacitor local WebView does not.
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === "true";
+
 export default defineConfig({
-  // GitHub Pages project site: https://gophisb.github.io/noor-quran/
-  base: "/noor-quran/",
+  base: isCapacitorBuild ? "./" : "/noor-quran/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -17,8 +19,6 @@ export default defineConfig({
     },
   },
   build: {
-    // Keep JS/CSS as separate cached assets instead of embedding the whole
-    // application (and the large embedded adhan audio) into index.html.
     assetsInlineLimit: 4096,
     sourcemap: false,
   },
