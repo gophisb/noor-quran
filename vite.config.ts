@@ -1,7 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
-import { viteSingleFile } from "vite-plugin-singlefile";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -10,8 +9,8 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   // GitHub Pages project site: https://gophisb.github.io/noor-quran/
-  base: "./",
-  plugins: [react(), tailwindcss(), viteSingleFile()],
+  base: "/noor-quran/",
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
