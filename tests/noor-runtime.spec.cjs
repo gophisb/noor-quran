@@ -23,3 +23,5 @@ test("Noor Quran boots without runtime errors", async ({ page }) => {
 });
 
 // Runtime smoke test: CommonJS runner for CI.
+
+// Verified assertion uses the rendered Arabic app name.
