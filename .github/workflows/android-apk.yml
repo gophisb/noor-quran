@@ -1,3 +1,4 @@
+# Manual APK build enabled; push to main also produces an installable release artifact.
 # يبني APK محايداً قابلاً للتثبيت المباشر (sideload) ويرفعه كـ Artifact وكـ Release عند وسم v*
 # لا يعتمد على أي متجر أو جهة خارجية — يعمل بالكامل داخل مستودعك.
 name: Build Android APK
