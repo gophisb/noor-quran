@@ -1,15 +1,22 @@
 // محرك الأذان: تشغيل/إيقاف موثوق + جدولة تلقائية عند دخول الوقت
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ADHAN_ALAQSA as alaqsa, ADHAN_MADINAH as madinah } from "../assets";
 import { useLocalState } from "./store";
 import { computeTimes, PRAYER_ORDER, type LocationState, type PrayerKey } from "./prayer";
 
 export const MUADHINS = [
-  { id: "alaqsa", name: "أذان المسجد الأقصى — القدس", src: alaqsa },
-  { id: "madinah", name: "أذان المسجد النبوي — المدينة", src: madinah },
+  { id: "alaqsa", name: "أذان المسجد الأقصى — القدس" },
+  { id: "madinah", name: "أذان المسجد النبوي — المدينة" },
 ] as const;
 export type MuadhinId = (typeof MUADHINS)[number]["id"];
 
+// لا نضمّن ملفات الأذان الكبيرة داخل الحزمة الرئيسية للويب.
+// تُحمّل عند الحاجة فقط، بينما تبقى ملفات Android الأصلية مستقلة.
+async function loadMuadhin(id: MuadhinId): Promise<string> {
+  if (id === "madinah") {
+    return (await import("../assets/adhanMadinah")).default;
+  }
+  return (await import("../assets/adhanAlaqsa")).default;
+}
 export interface AdhanSettings {
   enabled: boolean;
   muadhin: MuadhinId;
@@ -47,12 +54,11 @@ function getAudio() {
 let unlocked = false;
 export function unlockAudioOnFirstGesture() {
   if (unlocked) return;
-  const unlock = () => {
+  const unlock = async () => {
     if (unlocked) return;
     const a = getAudio();
     a.muted = true;
-    a.src = MUADHINS[0].src;
-    a.play()
+    loadMuadhin(MUADHINS[0].id).then((src) => { a.src = src; return a.play(); })
       .then(() => {
         a.pause();
         a.currentTime = 0;
@@ -115,11 +121,12 @@ export function useAdhanPlayer(settings: AdhanSettings) {
       // إيقاف أي تشغيل سابق قبل البدء
       a.pause();
       a.muted = false;
-      if (!a.src.endsWith(m.src)) a.src = m.src;
       a.currentTime = 0;
       a.volume = settings.volume;
       setError(null);
       try {
+        const src = await loadMuadhin(m.id);
+        if (a.src !== src) a.src = src;
         await a.play();
         setPlaying(true);
       } catch (e) {
