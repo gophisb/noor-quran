@@ -39,11 +39,14 @@ jobs:
           done
           curl -fsS http://127.0.0.1:4173/noor-quran/ > /dev/null
 
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.0
+
       - name: Install Chromium
-        run: npx --yes playwright@1.55.0 install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Browser runtime test
-        run: npx --yes playwright@1.55.0 test tests/noor-runtime.spec.js --workers=1
+        run: npx playwright test tests/noor-runtime.spec.cjs --workers=1
 
       - name: Show preview log on failure
         if: failure()
