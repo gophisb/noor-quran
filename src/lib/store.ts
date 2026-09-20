@@ -24,7 +24,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const isSettings = (value: unknown): value is Settings =>
   isRecord(value) &&
-  Number.isFinite(value.fontScale) &&
+  typeof value.fontScale === "number" && Number.isFinite(value.fontScale) &&
   value.fontScale >= 0.5 &&
   value.fontScale <= 2 &&
   typeof value.showTafsir === "boolean" &&
@@ -32,10 +32,10 @@ const isSettings = (value: unknown): value is Settings =>
 
 const isLastRead = (value: unknown): value is LastRead =>
   isRecord(value) &&
-  Number.isInteger(value.surah) &&
+  typeof value.surah === "number" && Number.isInteger(value.surah) &&
   value.surah >= 1 &&
   value.surah <= 114 &&
-  Number.isInteger(value.ayah) &&
+  typeof value.ayah === "number" && Number.isInteger(value.ayah) &&
   value.ayah >= 1 &&
   value.ayah <= 300;
 
@@ -47,7 +47,7 @@ const isBookmark = (value: unknown): value is Bookmark =>
   Number.isInteger(value.ayah) &&
   value.ayah >= 1 &&
   value.ayah <= 300 &&
-  Number.isFinite(value.addedAt);
+  typeof value.addedAt === "number" && Number.isFinite(value.addedAt);
 
 const isBookmarks = (value: unknown): value is Bookmark[] =>
   Array.isArray(value) && value.every(isBookmark);
