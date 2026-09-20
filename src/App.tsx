@@ -10,8 +10,6 @@ import ProfileView from "./components/ProfileView";
 import AdhanView from "./components/AdhanView";
 import { autoMethod, DEFAULT_LOCATION, deviceTimezone, getDeviceLocation, type LocationState } from "./lib/prayer";
 import { useAdhanPlayer, useAdhanScheduler, useAdhanSettings } from "./lib/adhan";
-import { isNative, scheduleNativeAdhan } from "./lib/nativeAdhan";
-import { App as CapApp } from "@capacitor/app";
 import { useBookmarks, useLastRead, useLocalState, useSettings } from "./lib/store";
 import { fmt } from "./lib/api";
 
@@ -40,6 +38,22 @@ export default function App() {
   const [adhanSettings, setAdhanSettings] = useAdhanSettings();
   const player = useAdhanPlayer(adhanSettings);
   const [banner, setBanner] = useState<string | null>(null);
+  const [native, setNative] = useState(false);
+
+  // Keep Capacitor/native code out of the web startup dependency graph.
+  useEffect(() => {
+    let active = true;
+    import("@capacitor/core")
+      .then(({ Capacitor }) => {
+        if (active) setNative(Capacitor.isNativePlatform());
+      })
+      .catch(() => {
+        if (active) setNative(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // أول تشغيل: محاولة تحديد الموقع تلقائياً إن لم يختر المستخدم موقعاً
   useEffect(() => {
@@ -66,18 +80,42 @@ export default function App() {
     setBanner(`حان الآن موعد صلاة ${names[key] ?? ""}`);
   }, []);
   // على الويب: الجدولة داخل الصفحة. على أندرويد: الإشعار المحلي بصوت الأذان هو المصدر الوحيد (يعمل والتطبيق مغلق)
-  const webScheduler = isNative() ? { ...adhanSettings, enabled: false } : adhanSettings;
+  const webScheduler = native ? { ...adhanSettings, enabled: false } : adhanSettings;
   useAdhanScheduler(location, webScheduler, player.play, onFire);
 
   useEffect(() => {
-    if (!isNative()) return;
-    const reschedule = () => scheduleNativeAdhan(location, adhanSettings).catch(() => undefined);
-    reschedule();
-    const sub = CapApp.addListener("resume", reschedule);
-    return () => {
-      sub.then((h) => h.remove());
+    if (!native) return;
+    let active = true;
+    let removeResume: (() => void) | undefined;
+
+    const setupNativeAdhan = async () => {
+      try {
+        const [{ scheduleNativeAdhan }, { App: CapApp }] = await Promise.all([
+          import("./lib/nativeAdhan"),
+          import("@capacitor/app"),
+        ]);
+        if (!active) return;
+        const reschedule = () => scheduleNativeAdhan(location, adhanSettings).catch(() => undefined);
+        reschedule();
+        const handle = await CapApp.addListener("resume", reschedule);
+        if (!active) {
+          await handle.remove();
+          return;
+        }
+        removeResume = () => {
+          handle.remove().catch(() => undefined);
+        };
+      } catch {
+        // Native scheduling is optional for web; keep the UI usable if the plugin is unavailable.
+      }
     };
-  }, [location, adhanSettings]);
+
+    setupNativeAdhan();
+    return () => {
+      active = false;
+      removeResume?.();
+    };
+  }, [native, location, adhanSettings]);
 
   useEffect(() => {
     if (!player.playing) setBanner(null);
