@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">houd11</string>
+    <string name="title_activity_main">houd11</string>
+    <string name="package_name">app.houd11.quran</string>
+    <string name="custom_url_scheme">app.houd11.quran</string>
+</resources>

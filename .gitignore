@@ -1,0 +1,35 @@
+# الاعتماديات
+node_modules/
+
+# مخرجات البناء
+dist/
+
+# Android — المشروع نفسه يُلتزم به؛ المخرجات لا
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+
+# مفاتيح التوقيع — لا تُرفع أبداً
+*.keystore
+*.jks
+
+# ملفات النظام
+.DS_Store
+Thumbs.db
+
+# السجلات
+*.log
+npm-debug.log*
+
+# البيئة المحلية
+.env
+.env.local
+.env.*.local
+
+# بيانات المحرر
+.vscode/
+.idea/
+*.swp
+*.swo

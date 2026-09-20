@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- هلال -->
+    <path android:fillColor="#E6C27A"
+        android:pathData="M60,26 A24,24 0 1,0 60,82 A19,19 0 1,1 60,26 Z"/>
+    <!-- نجمة ثمانية (زخرفة إسلامية) -->
+    <path android:fillColor="#5EEAD4"
+        android:pathData="M72,42 L75,50 L83,53 L75,56 L72,64 L69,56 L61,53 L69,50 Z"/>
+    <!-- سطر مصحف -->
+    <path android:strokeColor="#5EEAD4" android:strokeWidth="2.5" android:strokeLineCap="round"
+        android:pathData="M34,88 L74,88"/>
+</vector>

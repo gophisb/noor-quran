@@ -1,0 +1,49 @@
+# التمثيل الآلي لدستور RAFEEQ V3 — لا يُعدَّل إلا بموافقة الإنسان
+version: 3.0
+project: noor-quran
+
+autonomy:
+  max_runtime: 8h
+  max_tool_calls_per_task: 40
+  max_retries: 3
+  circuit_breaker_on_repeated_failure: true
+  require_checkpoint: true
+  require_plan_before_change: true
+
+permissions:
+  default_level: L2_EXECUTE
+  network: allowed_for_verification_only   # APIs مرجعية للتحقق، تنزيل أصول موثقة
+  sensitive_data: denied
+  production_deploy: approval_required
+
+security:
+  secrets_in_repo: denied
+  print_secrets: denied
+  disable_security_controls: denied
+
+quality:
+  require_typecheck: true          # npx tsc --noEmit --noUnusedLocals --noUnusedParameters
+  require_build: true              # npm run build
+  require_unit_tests: true         # RAFEEQ/scripts/test-compass.mjs
+  require_integration_tests: true  # RAFEEQ/scripts/verify-prayer-times.mjs (≤3 min tolerance)
+  require_invariant_check: true    # RAFEEQ/scripts/verify-invariants.mjs
+  max_prayer_time_deviation_minutes: 3
+
+scope:
+  allow_unplanned_changes: false
+  allow_dependency_add_without_adr: false
+  allow_refactor_outside_task: false
+
+governance:
+  self_modify_policy: false
+  self_modify_constitution: false
+  self_modify_invariants: false
+  update_project_state_after_task: required
+  update_changelog_after_task: required
+
+sacred_text:
+  # كتاب الله — لا يجوز كتابة أي آية يدويًا؛ المصدر الوحيد: Tanzil (رسم عثماني) عبر AlQuran Cloud
+  quran_text_source: "api.alquran.cloud/v1/surah/{n}/quran-uthmani"
+  tafsir_source: "cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/ar-tafsir-as-saadi/{n}.json"
+  manual_ayah_typing: denied
+  generated_religious_content: denied

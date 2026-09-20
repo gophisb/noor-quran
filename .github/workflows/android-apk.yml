@@ -1,0 +1,104 @@
+# يبني APK محايداً قابلاً للتثبيت المباشر (sideload) ويرفعه كـ Artifact وكـ Release عند وسم v*
+# لا يعتمد على أي متجر أو جهة خارجية — يعمل بالكامل داخل مستودعك.
+name: Build Android APK
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 build-tools;35.0.0"
+
+      - name: Install
+        run: npm ci
+
+      # بوابة RAFEEQ — لا APK بدون اجتياز الثوابت
+      - name: Quality gate (RAFEEQ)
+        run: |
+          node RAFEEQ/scripts/verify-invariants.mjs
+          node RAFEEQ/scripts/test-compass.mjs
+
+      - name: Web build
+        run: npm run build
+
+      - name: Generate Android project (idempotent)
+        run: |
+          if [ ! -f android/gradlew ]; then npx cap add android; fi
+          node RAFEEQ/scripts/prepare-android.mjs
+          npx cap sync android
+          chmod +x android/gradlew
+        env:
+          APP_VERSION: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '0.3.0' }}
+
+      # مفتاح توقيع: إن وُجدت الأسرار نُوقّع Release، وإلا نُنشئ مفتاحاً محلياً للجلسة (APK قابل للتثبيت لكن لا يُحدَّث فوق نسخة بمفتاح آخر)
+      - name: Prepare keystore
+        id: ks
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/noor.keystore"
+            echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+            echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+            echo "signed=true" >> $GITHUB_OUTPUT
+          else
+            keytool -genkeypair -v -keystore "$RUNNER_TEMP/noor.keystore" -alias noor -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass noor-ci-temp -keypass noor-ci-temp -dname "CN=Noor, OU=Noor, O=Noor, L=Quds, C=PS"
+            echo "KEYSTORE_PASSWORD=noor-ci-temp" >> $GITHUB_ENV
+            echo "KEY_ALIAS=noor" >> $GITHUB_ENV
+            echo "KEY_PASSWORD=noor-ci-temp" >> $GITHUB_ENV
+            echo "signed=temp" >> $GITHUB_OUTPUT
+          fi
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/noor.keystore" >> $GITHUB_ENV
+
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Verify APK
+        run: |
+          APK=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt2" dump badging "$APK" | grep -E "package:|application-label:" | head -3
+          cp "$APK" houd11.apk
+          sha256sum houd11.apk | tee houd11.apk.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: houd11-apk
+          path: |
+            houd11.apk
+            houd11.apk.sha256
+
+      - name: Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            houd11.apk
+            houd11.apk.sha256
+          body: |
+            تطبيق **نُور** — القرآن الكريم وتفسير السعدي، الأذان، المواقيت، القبلة.
+            APK مستقل قابل للتثبيت المباشر. التوقيع: ${{ steps.ks.outputs.signed == 'true' && 'مفتاح المشروع الدائم' || 'مفتاح مؤقت (أضف أسرار KEYSTORE_* للتوقيع الدائم)' }}

@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+@theme {
+  --font-ui: "Tajawal", system-ui, sans-serif;
+  --font-quran: "Amiri Quran", "Amiri", serif;
+  --font-amiri: "Amiri", serif;
+  --font-title: "Aref Ruqaa", "Amiri", serif;
+  --color-teal-glow: #5eead4;
+  --color-gold: #e6c27a;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  background: #050b14;
+  color: #e5f4f1;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* الخلفية الكونية */
+.cosmos {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 20%, rgba(20, 120, 110, 0.35), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 75%, rgba(90, 40, 140, 0.35), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 70% 15%, rgba(20, 80, 120, 0.25), transparent 60%),
+    radial-gradient(ellipse 30% 40% at 30% 85%, rgba(15, 100, 90, 0.25), transparent 60%),
+    linear-gradient(180deg, #060d18 0%, #050a12 50%, #070812 100%);
+}
+
+.cosmos::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 40px 70px, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 90px 40px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 160px 120px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 200px 20px, rgba(200, 240, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 240px 150px, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 280px 60px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 320px 110px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 360px 170px, rgba(180, 255, 240, 0.6), transparent);
+  background-size: 400px 200px;
+  opacity: 0.6;
+  animation: twinkle 8s ease-in-out infinite alternate;
+}
+
+.cosmos::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 60px 90px, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 180px 30px, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 300px 140px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 420px 60px, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1.5px 1.5px at 500px 180px, rgba(255, 255, 255, 0.6), transparent);
+  background-size: 560px 260px;
+  opacity: 0.5;
+  animation: twinkle 11s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes twinkle {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 0.75;
+  }
+}
+
+/* الزخرفة الهندسية */
+.geometry {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+/* الألواح الزجاجية */
+.glass {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(94, 234, 212, 0.05) inset,
+    0 20px 60px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(94, 234, 212, 0.05);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.glass-inner {
+  background: linear-gradient(180deg, rgba(10, 30, 34, 0.55), rgba(6, 16, 24, 0.55));
+  border: 1px solid rgba(94, 234, 212, 0.18);
+  box-shadow:
+    0 0 30px rgba(94, 234, 212, 0.08) inset,
+    0 10px 40px rgba(0, 0, 0, 0.35);
+}
+
+.glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.9), transparent);
+  box-shadow: 0 0 12px rgba(94, 234, 212, 0.6);
+}
+
+.glow-text {
+  text-shadow:
+    0 0 18px rgba(94, 234, 212, 0.55),
+    0 0 40px rgba(94, 234, 212, 0.25);
+}
+
+.gold-text {
+  color: #e6c27a;
+  text-shadow: 0 0 16px rgba(230, 194, 122, 0.45);
+}
+
+/* نص القرآن */
+.quran-text {
+  font-family: var(--font-quran);
+  line-height: 2.3;
+  word-spacing: 0.15em;
+  color: #f2fbf8;
+  text-shadow: 0 0 22px rgba(94, 234, 212, 0.35);
+}
+
+.ayah-mark {
+  font-family: var(--font-quran);
+  color: #e6c27a;
+  font-size: 0.85em;
+  margin: 0 0.15em;
+  text-shadow: 0 0 10px rgba(230, 194, 122, 0.5);
+}
+
+.tafsir-text {
+  font-family: var(--font-amiri);
+  line-height: 2.1;
+  color: #d5e6e2;
+}
+
+.tafsir-text .q {
+  color: #a7f3e6;
+  font-weight: 700;
+}
+
+/* شريط التمرير */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(94, 234, 212, 0.3) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(94, 234, 212, 0.3);
+  border-radius: 999px;
+}
+
+/* حركات */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fade-up 0.5s ease both;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+.pulse-ring {
+  animation: pulse-ring 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.12);
+  }
+  30% {
+    transform: scale(1);
+  }
+}
+.heartbeat {
+  animation: heartbeat 1.4s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+
+.tap-press:active {
+  transform: scale(0.97);
+}
