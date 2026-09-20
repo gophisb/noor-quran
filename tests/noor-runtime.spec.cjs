@@ -17,7 +17,7 @@ test("Noor Quran boots without runtime errors", async ({ page }) => {
   console.log("TITLE:", await page.title());
   console.log("ROOT:", rootText.slice(0, 1200));
 
-  expect(rootText).toContain("نور");
+  expect(rootText).toContain("نُور");
   expect(rootText).not.toMatch(/تعذر تشغيل واجهة التطبيق|تعذّر تشغيل واجهة التطبيق/);
   expect(errors, errors.join("\n")).toEqual([]);
 });
