@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import Background from "./components/Background";
 import Nav, { type View } from "./components/Nav";
 import PrayerBar from "./components/PrayerBar";
 import HomeView from "./components/HomeView";
-import QuranView from "./components/QuranView";
-import AthkarView from "./components/AthkarView";
-import QiblaView from "./components/QiblaView";
-import ProfileView from "./components/ProfileView";
-import AdhanView from "./components/AdhanView";
+const QuranView = lazy(() => import("./components/QuranView"));
+const AthkarView = lazy(() => import("./components/AthkarView"));
+const QiblaView = lazy(() => import("./components/QiblaView"));
+const ProfileView = lazy(() => import("./components/ProfileView"));
+const AdhanView = lazy(() => import("./components/AdhanView"));
 import { autoMethod, DEFAULT_LOCATION, deviceTimezone, getDeviceLocation, type LocationState } from "./lib/prayer";
 import { useAdhanPlayer, useAdhanScheduler, useAdhanSettings } from "./lib/adhan";
 import { isNative, scheduleNativeAdhan } from "./lib/nativeAdhan";
@@ -123,6 +123,7 @@ export default function App() {
           <PrayerBar location={location} onLocation={setLocation} madhab={adhanSettings.madhab} adhanEnabled={adhanSettings.enabled} onOpenAdhan={() => setView("adhan")} />
 
           <div className="fade-up" key={view}>
+            <Suspense fallback={<div className="glass rounded-3xl p-8 text-center text-sm text-white/60">جارٍ فتح القسم…</div>}>
             {view === "home" && <HomeView lastRead={lastRead} bookmarks={bookmarks} name={settings.name} onOpen={openAyah} onGo={setView} />}
             {view === "quran" && (
               <QuranView
@@ -140,6 +141,7 @@ export default function App() {
             {view === "profile" && (
               <ProfileView settings={settings} onChange={setSettings} lastRead={lastRead} bookmarks={bookmarks} onOpen={openAyah} onToggleBookmark={toggle} />
             )}
+            </Suspense>
           </div>
         </div>
       </main>
