@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 export interface Settings {
-  fontScale: number; // 0.8 – 1.6
+  fontScale: number;
   showTafsir: boolean;
   name: string;
 }
@@ -19,15 +19,37 @@ export interface Bookmark {
 
 const DEFAULT_SETTINGS: Settings = { fontScale: 1, showTafsir: true, name: "" };
 
+function hydrate<T>(initial: T, raw: string): T {
+  const parsed: unknown = JSON.parse(raw);
+
+  if (Array.isArray(initial)) {
+    return Array.isArray(parsed) ? (parsed as T) : initial;
+  }
+
+  if (
+    initial !== null &&
+    typeof initial === "object" &&
+    !Array.isArray(initial) &&
+    parsed !== null &&
+    typeof parsed === "object" &&
+    !Array.isArray(parsed)
+  ) {
+    return { ...initial, ...(parsed as object) } as T;
+  }
+
+  return parsed as T;
+}
+
 export function useLocalState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(key);
-      return raw ? { ...initial, ...(JSON.parse(raw) as T) } : initial;
+      return raw ? hydrate(initial, raw) : initial;
     } catch {
       return initial;
     }
   });
+
   useEffect(() => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
@@ -35,6 +57,7 @@ export function useLocalState<T>(key: string, initial: T) {
       /* ignore */
     }
   }, [key, value]);
+
   return [value, setValue] as const;
 }
 
@@ -75,14 +98,16 @@ export function useAthkarProgress() {
     day: today,
     progress: {},
   });
-  // إعادة التعيين يومياً
+
   useEffect(() => {
     if (state.day !== today) setState({ day: today, progress: {} });
   }, [state.day, today, setState]);
+
   const setCount = useCallback(
     (id: string, n: number) => setState((s) => ({ day: today, progress: { ...s.progress, [id]: n } })),
     [setState, today]
   );
+
   const resetAll = useCallback(() => setState({ day: today, progress: {} }), [setState, today]);
   return { progress: state.progress, setCount, resetAll };
 }
