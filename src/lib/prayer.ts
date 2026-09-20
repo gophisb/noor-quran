@@ -72,11 +72,30 @@ const REGIONAL: Partial<Record<MethodKey, () => CalculationParameters>> = {
 export function paramsFor(method: MethodKey, madhab: "shafi" | "hanafi" = "shafi", coords?: Coords): CalculationParameters {
   const builtin = CalculationMethod as unknown as Record<string, () => CalculationParameters>;
   const factory = REGIONAL[method] ?? builtin[method] ?? CalculationMethod.MuslimWorldLeague;
-  const p = factory();
+  let p: CalculationParameters;
+  try {
+    p = factory();
+  } catch {
+    p = CalculationMethod.MuslimWorldLeague();
+  }
   p.madhab = madhab === "hanafi" ? Madhab.Hanafi : Madhab.Shafi;
-  // قاعدة خطوط العرض العالية الموصى بها للموقع (مهم للمناطق شمال 48°)
-  p.highLatitudeRule = coords ? HighLatitudeRule.recommended(new Coordinates(coords.lat, coords.lng)) : HighLatitudeRule.MiddleOfTheNight;
+  try {
+    p.highLatitudeRule = coords
+      ? HighLatitudeRule.recommended(new Coordinates(coords.lat, coords.lng))
+      : HighLatitudeRule.MiddleOfTheNight;
+  } catch {
+    p.highLatitudeRule = HighLatitudeRule.MiddleOfTheNight;
+  }
   return p;
+}
+
+function safeCoords(coords: Coords): Coords {
+  const lat = Number(coords?.lat);
+  const lng = Number(coords?.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    return DEFAULT_LOCATION.coords;
+  }
+  return { lat, lng };
 }
 
 export interface DayTimes {
@@ -89,8 +108,18 @@ export interface DayTimes {
 }
 
 export function computeTimes(loc: LocationState, date = new Date(), madhab: "shafi" | "hanafi" = "shafi"): DayTimes {
-  const pt = new AdhanPrayerTimes(new Coordinates(loc.coords.lat, loc.coords.lng), date, paramsFor(loc.method, madhab, loc.coords));
-  return { fajr: pt.fajr, sunrise: pt.sunrise, dhuhr: pt.dhuhr, asr: pt.asr, maghrib: pt.maghrib, isha: pt.isha };
+  const coords = safeCoords(loc?.coords ?? DEFAULT_LOCATION.coords);
+  try {
+    const pt = new AdhanPrayerTimes(new Coordinates(coords.lat, coords.lng), date, paramsFor(loc?.method ?? "MuslimWorldLeague", madhab, coords));
+    return { fajr: pt.fajr, sunrise: pt.sunrise, dhuhr: pt.dhuhr, asr: pt.asr, maghrib: pt.maghrib, isha: pt.isha };
+  } catch {
+    const pt = new AdhanPrayerTimes(
+      new Coordinates(DEFAULT_LOCATION.coords.lat, DEFAULT_LOCATION.coords.lng),
+      date,
+      CalculationMethod.MuslimWorldLeague()
+    );
+    return { fajr: pt.fajr, sunrise: pt.sunrise, dhuhr: pt.dhuhr, asr: pt.asr, maghrib: pt.maghrib, isha: pt.isha };
+  }
 }
 
 /** تنسيق وقت بحسب المنطقة الزمنية للموقع المختار */
