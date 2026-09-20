@@ -42,8 +42,18 @@ jobs:
           node RAFEEQ/scripts/verify-invariants.mjs
           node RAFEEQ/scripts/test-compass.mjs
 
-      - name: Web build
+      - name: Web build for Capacitor
         run: npm run build
+        env:
+          CAPACITOR_BUILD: "true"
+
+      - name: Verify Capacitor asset paths
+        run: |
+          grep -q 'src="./' dist/index.html
+          if grep -q '/noor-quran/assets/' dist/index.html; then
+            echo "ERROR: Android build still contains GitHub Pages absolute asset paths."
+            exit 1
+          fi
 
       - name: Generate Android project (idempotent)
         run: |
