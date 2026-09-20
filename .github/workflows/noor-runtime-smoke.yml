@@ -44,7 +44,7 @@ jobs:
 
       - name: Browser runtime test
         run: |
-          npx --yes -p playwright@1.55.0 node <<'NODE'
+          npx --yes --package playwright@1.55.0 -- node <<'NODE'
           const { chromium } = require("playwright");
 
           (async () => {
