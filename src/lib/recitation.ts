@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const pad = (n: number, w: number) => String(n).padStart(w, "0");
 export const ayahAudioUrl = (surah: number, ayah: number) =>
   import.meta.env.BASE_URL + "offline/audio/" + pad(surah, 3) + pad(ayah, 3) + ".mp3";
-export const ayahAudioFallback = ayahAudioUrl;
+export const ayahAudioFallback = (globalNumber: number) => String(globalNumber);
 
 let shared: HTMLAudioElement | null = null;
 function audio() {
@@ -79,12 +79,8 @@ export function useRecitation({ surah, totalAyahs, globalOf, onAyahChange, onSur
     const onError = () => {
       const st = stateRef.current;
       if (!st.playing || st.ayah === null || st.surah === null) return;
-      if (!triedFallback.current) {
-        triedFallback.current = true;
-        loadAndPlay(st.surah, st.ayah, true);
-      } else {
-        setState((s) => ({ ...s, playing: false, loading: false, error: "تعذّر تحميل صوت هذه الآية" }));
-      }
+      triedFallback.current = true;
+      setState((s) => ({ ...s, playing: false, loading: false, error: "تعذّر تحميل صوت هذه الآية المحلية" }));
     };
     el.addEventListener("ended", onEnded);
     el.addEventListener("error", onError);
