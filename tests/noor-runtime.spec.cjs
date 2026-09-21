@@ -41,29 +41,31 @@ test.describe("mobile touch interaction", () => {
       timeout: 30000,
     });
 
-    const expected = [
-      ["القرآن", "سورة الفاتحة"],
-      ["الأذان", "تجربة الأذان"],
-      ["الأذكار", "تسبيح"],
-      ["القبلة", "اتجاه القبلة"],
-      ["حسابي", "الإعدادات"],
-    ];
+    const expectedViews = ["quran", "adhan", "athkar", "qibla", "profile"];
 
-    for (const [label, viewText] of expected) {
-      const button = page.getByRole("button", { name: label, exact: true }).last();
+    for (const view of expectedViews) {
+      const labels = {
+        quran: "القرآن",
+        adhan: "الأذان",
+        athkar: "الأذكار",
+        qibla: "القبلة",
+        profile: "حسابي",
+      };
+      const button = page.getByRole("button", { name: labels[view], exact: true }).last();
       await expect(button).toBeVisible();
       await button.tap();
-      await expect(page.getByText(viewText, { exact: false }).first()).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('[data-view="' + view + '"]')).toBeVisible({ timeout: 10000 });
     }
 
     const home = page.getByRole("button", { name: "الرئيسية", exact: true }).last();
     await expect(home).toBeVisible();
     await home.tap();
+    await expect(page.locator('[data-view="home"]')).toBeVisible();
 
     const quickQuran = page.getByRole("button", { name: /المصحف/ }).first();
     await expect(quickQuran).toBeVisible();
     await quickQuran.tap();
-    await expect(page.getByText("سورة الفاتحة", { exact: false }).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-view="quran"]')).toBeVisible({ timeout: 10000 });
 
     expect(errors, errors.join("\n")).toEqual([]);
   });
