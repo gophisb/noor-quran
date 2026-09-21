@@ -15,7 +15,7 @@ permissions:
 jobs:
   apk:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
@@ -35,6 +35,12 @@ jobs:
 
       - name: Install
         run: npm ci
+
+      - name: Restore offline content cache
+        uses: actions/cache@v4
+        with:
+          path: public/offline
+          key: noor-offline-${{ hashFiles('scripts/prepare-offline.mjs') }}
 
       # بوابة RAFEEQ — لا APK بدون اجتياز الثوابت
       - name: Quality gate (RAFEEQ)
