@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npm run prepare:offline && vite build",
+    "preview": "vite preview",
+    "prepare:offline": "node scripts/prepare-offline.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.6.9",
