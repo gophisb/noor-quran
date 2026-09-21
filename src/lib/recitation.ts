@@ -3,10 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const pad = (n: number, w: number) => String(n).padStart(w, "0");
 export const ayahAudioUrl = (surah: number, ayah: number) =>
-  `https://everyayah.com/data/Minshawy_Murattal_128kbps/${pad(surah, 3)}${pad(ayah, 3)}.mp3`;
-// مصدر بديل بالرقم العام للآية
-export const ayahAudioFallback = (globalNumber: number) =>
-  `https://cdn.islamic.network/quran/audio/128/ar.minshawi/${globalNumber}.mp3`;
+  import.meta.env.BASE_URL + "offline/audio/" + pad(surah, 3) + pad(ayah, 3) + ".mp3";
+export const ayahAudioFallback = ayahAudioUrl;
 
 let shared: HTMLAudioElement | null = null;
 function audio() {
@@ -59,7 +57,7 @@ export function useRecitation({ surah, totalAyahs, globalOf, onAyahChange, onSur
         }
       } catch (e) {
         if ((e as Error).name === "AbortError") return;
-        setState((st) => ({ ...st, playing: false, loading: false, error: "تعذّر تشغيل التلاوة — تحقق من الاتصال بالإنترنت" }));
+        setState((st) => ({ ...st, playing: false, loading: false, error: "تعذّر تشغيل التلاوة المحلية" }));
       }
     },
     [globalOf, onAyahChange, totalAyahs]
