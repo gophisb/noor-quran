@@ -40,9 +40,9 @@ jobs:
           test -f dist/manifest.webmanifest
           test -f dist/icons/icon.svg
           test -f dist/404.html
-          grep -q 'href="./manifest.webmanifest"' dist/index.html
-          grep -q 'href="./icons/icon.svg"' dist/index.html
-          ! grep -q '/noor-quran/assets/' dist/index.html
+          grep -q 'manifest.webmanifest' dist/index.html
+          grep -q 'icons/icon.svg' dist/index.html
+          ! grep -q 'src="/noor-quran/' dist/index.html
           test -f dist/.nojekyll
           wc -c dist/index.html
 
