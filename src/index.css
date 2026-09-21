@@ -19,6 +19,15 @@ body,
   min-height: 100%;
 }
 
+button,
+a,
+input,
+select,
+summary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   margin: 0;
   font-family: var(--font-ui);
@@ -30,6 +39,7 @@ body {
 
 /* الخلفية الكونية */
 .cosmos {
+  pointer-events: none;
   position: fixed;
   inset: 0;
   z-index: -2;
