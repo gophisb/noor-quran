@@ -23,8 +23,13 @@ export interface TafsirEntry {
   text: string;
 }
 
-const QURAN_API = "https://api.alquran.cloud/v1/surah";
-const TAFSIR_API = "https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/ar-tafsir-as-saadi";
+const OFFLINE_BASE = import.meta.env.BASE_URL;
+
+async function loadOffline<T>(file: string): Promise<T> {
+  const res = await fetch(`${OFFLINE_BASE}offline/${file}`);
+  if (!res.ok) throw new Error("البيانات المحلية غير مكتملة");
+  return (await res.json()) as T;
+}
 
 export const BISMILLAH = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ";
 
@@ -63,10 +68,9 @@ async function cached<T>(key: string, loader: () => Promise<T>): Promise<T> {
 /** جلب سورة كاملة بالرسم العثماني */
 export function fetchSurah(number: number): Promise<SurahData> {
   return cached(`surah:${number}`, async () => {
-    const res = await fetch(`${QURAN_API}/${number}/quran-uthmani`);
-    if (!res.ok) throw new Error("تعذّر تحميل السورة");
-    const json = await res.json();
-    const d = json.data;
+    const all = await loadOffline<SurahData[]>("quran.json");
+    const d = all[number - 1];
+    if (!d) throw new Error("السورة غير موجودة في الحزمة المحلية");
     const ayahs: Ayah[] = d.ayahs.map((a: Ayah & { sajda: unknown }) => {
       let text = (a.text as string).replace(/^\uFEFF/, "");
       // البسملة تأتي ملحقة بأول آية في المصدر؛ نفصلها لعرضها كترويسة مستقلة
@@ -97,9 +101,8 @@ export function fetchSurah(number: number): Promise<SurahData> {
 /** جلب تفسير السعدي لسورة كاملة */
 export function fetchTafsir(number: number): Promise<TafsirEntry[]> {
   return cached(`tafsir-saadi:${number}`, async () => {
-    const res = await fetch(`${TAFSIR_API}/${number}.json`);
-    if (!res.ok) throw new Error("تعذّر تحميل التفسير");
-    const json = (await res.json()) as TafsirEntry[];
+    const all = await loadOffline<Record<string, TafsirEntry[]>>("tafsir-saadi.json");
+    const json = all[String(number)] ?? [];
     return json.map((t) => ({ ayah: t.ayah, surah: t.surah, text: t.text || "" }));
   });
 }
