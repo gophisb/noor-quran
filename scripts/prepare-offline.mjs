@@ -13,10 +13,18 @@ const AUDIO_BASE = "https://www.everyayah.com/data/Menshawi_16kbps/zips";
 
 async function exists(p) { try { await access(p); return true; } catch { return false; } }
 
-async function fetchJson(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
-  return res.json();
+async function fetchJson(url, attempts = 6) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const res = await fetch(url);
+    if (res.ok) return res.json();
+    if (res.status === 429 || res.status >= 500) {
+      const wait = Math.min(8000, 750 * 2 ** attempt);
+      await new Promise(r => setTimeout(r, wait));
+      continue;
+    }
+    throw new Error(`HTTP ${res.status}: ${url}`);
+  }
+  throw new Error(`HTTP 429/5xx after retries: ${url}`);
 }
 
 async function download(url, file) {
