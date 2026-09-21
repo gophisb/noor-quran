@@ -49,4 +49,10 @@ const mount = (App: React.ComponentType) => {
   );
 };
 
-mount(App);\n\nif ("serviceWorker" in navigator && import.meta.env.PROD) {\n  window.addEventListener("load", () => {\n    navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", { scope: import.meta.env.BASE_URL }).catch(() => undefined);\n  });\n}
+mount(App);
+
+if ("serviceWorker" in navigator && import.meta.env.PROD) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(import.meta.env.BASE_URL + "sw.js", { scope: import.meta.env.BASE_URL }).catch(() => undefined);
+  });
+}
