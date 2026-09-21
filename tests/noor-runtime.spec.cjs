@@ -26,39 +26,45 @@ test("Noor Quran boots without runtime errors", async ({ page }) => {
   expect(errors, errors.join("\n")).toEqual([]);
 });
 
-test("Main navigation responds to touch-sized clicks", async ({ page }) => {
-  const errors = [];
-  await installRuntimeErrorHooks(page, errors);
-
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("http://127.0.0.1:4173/noor-quran/", {
-    waitUntil: "networkidle",
-    timeout: 30000,
+test.describe("mobile touch interaction", () => {
+  test.use({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
   });
 
-  const expected = [
-    ["القرآن", "سورة الفاتحة"],
-    ["الأذان", "تجربة الأذان"],
-    ["الأذكار", "تسبيح"],
-    ["القبلة", "اتجاه القبلة"],
-    ["حسابي", "الإعدادات"],
-  ];
+  test("Main navigation responds to real touch taps", async ({ page }) => {
+    const errors = [];
+    await installRuntimeErrorHooks(page, errors);
 
-  for (const [label, viewText] of expected) {
-    const button = page.getByRole("button", { name: label, exact: true }).last();
-    await expect(button).toBeVisible();
-    await button.click({ delay: 25 });
-    await expect(page.getByText(viewText, { exact: false }).first()).toBeVisible({ timeout: 10000 });
-  }
+    await page.goto("http://127.0.0.1:4173/noor-quran/", {
+      waitUntil: "networkidle",
+      timeout: 30000,
+    });
 
-  const home = page.getByRole("button", { name: "الرئيسية", exact: true }).last();
-  await expect(home).toBeVisible();
-  await home.click({ delay: 25 });
+    const expected = [
+      ["القرآن", "سورة الفاتحة"],
+      ["الأذان", "تجربة الأذان"],
+      ["الأذكار", "تسبيح"],
+      ["القبلة", "اتجاه القبلة"],
+      ["حسابي", "الإعدادات"],
+    ];
 
-  const quickQuran = page.getByRole("button", { name: /المصحف/ }).first();
-  await expect(quickQuran).toBeVisible();
-  await quickQuran.click({ delay: 25 });
-  await expect(page.getByText("سورة الفاتحة", { exact: false }).first()).toBeVisible({ timeout: 10000 });
+    for (const [label, viewText] of expected) {
+      const button = page.getByRole("button", { name: label, exact: true }).last();
+      await expect(button).toBeVisible();
+      await button.tap();
+      await expect(page.getByText(viewText, { exact: false }).first()).toBeVisible({ timeout: 10000 });
+    }
 
-  expect(errors, errors.join("\n")).toEqual([]);
+    const home = page.getByRole("button", { name: "الرئيسية", exact: true }).last();
+    await expect(home).toBeVisible();
+    await home.tap();
+
+    const quickQuran = page.getByRole("button", { name: /المصحف/ }).first();
+    await expect(quickQuran).toBeVisible();
+    await quickQuran.tap();
+    await expect(page.getByText("سورة الفاتحة", { exact: false }).first()).toBeVisible({ timeout: 10000 });
+
+    expect(errors, errors.join("\n")).toEqual([]);
+  });
 });
