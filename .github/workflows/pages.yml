@@ -1,4 +1,5 @@
 name: Deploy Noor Quran to GitHub Pages
+# Pages deployment guard: keep Android build untouched; this workflow only publishes dist.
 
 on:
   push:
