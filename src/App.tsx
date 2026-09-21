@@ -160,7 +160,7 @@ export default function App() {
         <div className="min-w-0 flex-1 space-y-4">
           <PrayerBar location={location} onLocation={setLocation} madhab={adhanSettings.madhab} adhanEnabled={adhanSettings.enabled} onOpenAdhan={() => setView("adhan")} />
 
-          <div className="fade-up" key={view}>
+          <div className="fade-up" key={view} data-view={view}>
             <Suspense fallback={<div className="glass rounded-3xl p-8 text-center text-sm text-white/60">جارٍ فتح القسم…</div>}>
             {view === "home" && <HomeView lastRead={lastRead} bookmarks={bookmarks} name={settings.name} onOpen={openAyah} onGo={setView} />}
             {view === "quran" && (
