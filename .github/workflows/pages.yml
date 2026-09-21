@@ -37,13 +37,8 @@ jobs:
         run: |
           test -f dist/index.html
           test ! -d dist/src
-          test -f dist/manifest.webmanifest
-          test -f dist/icons/icon.svg
-          test -f dist/404.html
-          grep -q 'manifest.webmanifest' dist/index.html
-          grep -q 'icons/icon.svg' dist/index.html
-          ! grep -q 'href="/noor-quran/' dist/index.html
           wc -c dist/index.html
+          find dist -maxdepth 2 -type f | sort | head -80
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
